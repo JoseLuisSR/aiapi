@@ -1,6 +1,7 @@
 import os
 from abc import ABC, abstractmethod
 
+from anthropic import Anthropic
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
@@ -60,10 +61,33 @@ class AIAPIGemini(AIAPI):
         self.client.close
 
 
+class AIAPIClaude(AIAPI):
+    def __init__(self):
+        self.client = Anthropic(
+            api_key=os.environ.get(Config.CLAUDE_API_KEY),
+        )
+
+    def generate_content(self, params) -> str:
+        self.response = self.client.messages.create(
+            max_tokens=params.get("max_tokens"),
+            messages=[{"role": "user", "content": params.get("prompt")}],
+            model=params.get("model"),
+            temperature=params.get("temperature"),
+            # top_p=params.get("top_p"),
+            top_k=params.get("top_k"),
+        )
+        return self.response.content
+
+    def close_client(self):
+        self.client.close()
+
+
 class AIAPIFactory:
     OPENAI_API = "OPENAI_API"
 
     GEMINI_API = "GEMINI_API"
+
+    CLAUDE_API = "CLAUDE_API"
 
     _instance = None
 
@@ -78,5 +102,7 @@ class AIAPIFactory:
                 return AIAPIOpenAI()
             case AIAPIFactory.GEMINI_API:
                 return AIAPIGemini()
+            case AIAPIFactory.CLAUDE_API:
+                return AIAPIClaude()
             case _:
                 raise ValueError(f"Unsupported AI API: {aiapi}")
