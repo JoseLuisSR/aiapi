@@ -11,7 +11,7 @@ from config import Config
 load_dotenv()
 
 
-class AIAPIBase(ABC):
+class AIAPI(ABC):
     @abstractmethod
     def generate_content(self, params: dict) -> str:
         pass
@@ -19,10 +19,6 @@ class AIAPIBase(ABC):
     @abstractmethod
     def close_client(self):
         pass
-
-
-class AIAPI(AIAPIBase):
-    pass
 
 
 class AIAPIOpenAI(AIAPI):
