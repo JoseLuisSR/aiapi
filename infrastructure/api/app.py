@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from infrastructure.llm.factory_adapter import AIAPIFactory
+from infrastructure.llm.factory_adapter import LLMFactoryAdapter
 
 app = FastAPI(
     title="AIAPI",
@@ -12,9 +12,9 @@ app = FastAPI(
 )
 
 VALID_PROVIDERS = {
-    AIAPIFactory.OPENAI_API,
-    AIAPIFactory.GEMINI_API,
-    AIAPIFactory.CLAUDE_API,
+    LLMFactoryAdapter.OPENAI_API,
+    LLMFactoryAdapter.GEMINI_API,
+    LLMFactoryAdapter.CLAUDE_API,
 }
 
 
@@ -54,10 +54,10 @@ async def generate(request: GenerateRequest):
         "max_tokens": request.max_tokens,
     }
 
-    factory = AIAPIFactory()
+    factory = LLMFactoryAdapter()
     client = None
     try:
-        client = factory.create_aiapi(request.provider)
+        client = factory.create_llm(request.provider)
         result = client.generate_content(params)
         return GenerateResponse(
             success=True,

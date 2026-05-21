@@ -1,10 +1,12 @@
-from .aiapi import AIAPI
+from application.ports.llm_factory_port import LLMFactoryPort
+from application.ports.llm_port import LLMPort
+
 from .claude_adapter import ClaudeAdapter
 from .gemini_adapter import GeminiAdapter
 from .openai_adapter import OpenAIAdapter
 
 
-class FactoryLLMAdapter:
+class LLMFactoryAdapter(LLMFactoryPort):
     OPENAI_API = "OPENAI_API"
 
     GEMINI_API = "GEMINI_API"
@@ -18,13 +20,13 @@ class FactoryLLMAdapter:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def create_aiapi(self, aiapi: str) -> AIAPI:
-        match aiapi:
-            case FactoryLLMAdapter.OPENAI_API:
+    def create_llm(self, llm: str) -> LLMPort:
+        match llm:
+            case LLMFactoryAdapter.OPENAI_API:
                 return OpenAIAdapter()
-            case FactoryLLMAdapter.GEMINI_API:
+            case LLMFactoryAdapter.GEMINI_API:
                 return GeminiAdapter()
-            case FactoryLLMAdapter.CLAUDE_API:
+            case LLMFactoryAdapter.CLAUDE_API:
                 return ClaudeAdapter()
             case _:
-                raise ValueError(f"Unsupported AI API: {aiapi}")
+                raise ValueError(f"Unsupported LLM: {llm}")
