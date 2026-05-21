@@ -1,8 +1,7 @@
-from typing import Optional
-
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
 
+from application.dto.llm_request import LLMRequest
+from application.dto.llm_response import LLMResponse
 from infrastructure.llm.factory_adapter import LLMFactoryAdapter
 
 app = FastAPI(
@@ -18,28 +17,8 @@ VALID_PROVIDERS = {
 }
 
 
-class GenerateRequest(BaseModel):
-    provider: str = Field(
-        ..., description="AI provider (OPENAI_API, GEMINI_API, CLAUDE_API)"
-    )
-    model: str = Field(..., description="Model name")
-    prompt: str = Field(..., description="Prompt text")
-    temperature: Optional[float] = Field(default=None, description="Temperature")
-    top_p: Optional[float] = Field(default=None, description="Top P")
-    top_k: Optional[int] = Field(default=None, description="Top K")
-    max_tokens: Optional[int] = Field(default=None, description="Max tokens")
-
-
-class GenerateResponse(BaseModel):
-    success: bool
-    provider: Optional[str] = None
-    model: Optional[str] = None
-    result: Optional[str] = None
-    error: Optional[str] = None
-
-
-@app.post("/api/v1/generate", response_model=GenerateResponse)
-async def generate(request: GenerateRequest):
+@app.post("/api/v1/generate", response_model=LLMResponse)
+async def generate(request: LLMRequest):
     if request.provider not in VALID_PROVIDERS:
         raise HTTPException(
             status_code=400, detail=f"Unsupported provider: {request.provider}"
@@ -59,7 +38,7 @@ async def generate(request: GenerateRequest):
     try:
         client = factory.create_llm(request.provider)
         result = client.generate_content(params)
-        return GenerateResponse(
+        return LLMResponse(
             success=True,
             provider=request.provider,
             model=request.model,
