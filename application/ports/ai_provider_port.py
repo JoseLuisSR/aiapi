@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-class LLMPort(ABC):
+class AIProviderPort(ABC):
     @abstractmethod
     def generate_content(self, params: dict) -> str:
         pass

@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 
 from application.dto.llm_request import LLMRequest
 from application.dto.llm_response import LLMResponse
-from infrastructure.adapters.factory_adapter import LLMFactoryAdapter
+from infrastructure.adapters.factory_adapter import AIProviderFactoryAdapter
 
 app = FastAPI(
     title="AIAPI",
@@ -11,9 +11,9 @@ app = FastAPI(
 )
 
 VALID_PROVIDERS = {
-    LLMFactoryAdapter.OPENAI_API,
-    LLMFactoryAdapter.GEMINI_API,
-    LLMFactoryAdapter.CLAUDE_API,
+    AIProviderFactoryAdapter.OPENAI_API,
+    AIProviderFactoryAdapter.GEMINI_API,
+    AIProviderFactoryAdapter.CLAUDE_API,
 }
 
 
@@ -33,7 +33,7 @@ async def generate(request: LLMRequest):
         "max_tokens": request.max_tokens,
     }
 
-    factory = LLMFactoryAdapter()
+    factory = AIProviderFactoryAdapter()
     client = None
     try:
         client = factory.create_llm(request.provider)

@@ -1,12 +1,12 @@
-from application.ports.llm_factory_port import LLMFactoryPort
-from application.ports.llm_port import LLMPort
+from application.ports.ai_provider_factory_port import AIProviderFactoryPort
+from application.ports.ai_provider_port import AIProviderPort
 
 from .claude_adapter import ClaudeAdapter
 from .gemini_adapter import GeminiAdapter
 from .openai_adapter import OpenAIAdapter
 
 
-class LLMFactoryAdapter(LLMFactoryPort):
+class AIProviderFactoryAdapter(AIProviderFactoryPort):
     OPENAI_API = "OPENAI_API"
 
     GEMINI_API = "GEMINI_API"
@@ -20,13 +20,13 @@ class LLMFactoryAdapter(LLMFactoryPort):
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def create_llm(self, llm: str) -> LLMPort:
+    def create_llm(self, llm: str) -> AIProviderPort:
         match llm:
-            case LLMFactoryAdapter.OPENAI_API:
+            case AIProviderFactoryAdapter.OPENAI_API:
                 return OpenAIAdapter()
-            case LLMFactoryAdapter.GEMINI_API:
+            case AIProviderFactoryAdapter.GEMINI_API:
                 return GeminiAdapter()
-            case LLMFactoryAdapter.CLAUDE_API:
+            case AIProviderFactoryAdapter.CLAUDE_API:
                 return ClaudeAdapter()
             case _:
                 raise ValueError(f"Unsupported LLM: {llm}")

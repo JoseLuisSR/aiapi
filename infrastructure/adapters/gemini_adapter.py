@@ -4,13 +4,13 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
-from application.ports.llm_port import LLMPort
+from application.ports.ai_provider_port import AIProviderPort
 from config import Config
 
 load_dotenv()
 
 
-class GeminiAdapter(LLMPort):
+class GeminiAdapter(AIProviderPort):
     def __init__(self):
         self.client = genai.Client(api_key=os.environ.get(Config.GEMINI_API_KEY))
 

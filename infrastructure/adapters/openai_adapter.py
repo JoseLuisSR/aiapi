@@ -3,13 +3,13 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from application.ports.llm_port import LLMPort
+from application.ports.ai_provider_port import AIProviderPort
 from config import Config
 
 load_dotenv()
 
 
-class OpenAIAdapter(LLMPort):
+class OpenAIAdapter(AIProviderPort):
     def __init__(self):
         self.client = OpenAI(
             api_key=os.environ.get(Config.OPENAI_API_KEY),

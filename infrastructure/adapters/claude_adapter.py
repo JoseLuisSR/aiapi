@@ -3,13 +3,13 @@ import os
 from anthropic import Anthropic
 from dotenv import load_dotenv
 
-from application.ports.llm_port import LLMPort
+from application.ports.ai_provider_port import AIProviderPort
 from config import Config
 
 load_dotenv()
 
 
-class ClaudeAdapter(LLMPort):
+class ClaudeAdapter(AIProviderPort):
     def __init__(self):
         self.client = Anthropic(
             api_key=os.environ.get(Config.CLAUDE_API_KEY),
