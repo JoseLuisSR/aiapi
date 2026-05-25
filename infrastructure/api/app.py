@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 
 from application.dto.llm_request import LLMRequest
 from application.dto.llm_response import LLMResponse
-from infrastructure.llm.factory_adapter import LLMFactoryAdapter
+from infrastructure.adapters.factory_adapter import LLMFactoryAdapter
 
 app = FastAPI(
     title="AIAPI",
