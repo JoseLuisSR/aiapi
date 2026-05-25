@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 
-from application.dto.llm_request import LLMRequest
-from application.dto.llm_response import LLMResponse
+from application.dto.ai_request import AIRequest
+from application.dto.ai_response import AIResponse
 from infrastructure.adapters.factory_adapter import AIProviderFactoryAdapter
 
 app = FastAPI(
@@ -17,8 +17,8 @@ VALID_PROVIDERS = {
 }
 
 
-@app.post("/api/v1/generate", response_model=LLMResponse)
-async def generate(request: LLMRequest):
+@app.post("/api/v1/generate", response_model=AIResponse)
+async def generate(request: AIRequest):
     if request.provider not in VALID_PROVIDERS:
         raise HTTPException(
             status_code=400, detail=f"Unsupported provider: {request.provider}"
@@ -38,7 +38,7 @@ async def generate(request: LLMRequest):
     try:
         client = factory.create_llm(request.provider)
         result = client.generate_content(params)
-        return LLMResponse(
+        return AIResponse(
             success=True,
             provider=request.provider,
             model=request.model,

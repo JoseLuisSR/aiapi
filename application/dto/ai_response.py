@@ -3,7 +3,7 @@ from typing import Optional
 from pydantic import BaseModel
 
 
-class LLMResponse(BaseModel):
+class AIResponse(BaseModel):
     success: bool
     provider: Optional[str] = None
     model: Optional[str] = None

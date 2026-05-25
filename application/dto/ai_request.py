@@ -3,7 +3,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 
-class LLMRequest(BaseModel):
+class AIRequest(BaseModel):
     provider: str = Field(
         ..., description="AI provider (OPENAI_API, GEMINI_API, CLAUDE_API)"
     )
