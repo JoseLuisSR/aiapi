@@ -2,7 +2,8 @@ from fastapi import FastAPI, HTTPException
 
 from application.dto.ai_request import AIRequest
 from application.dto.ai_response import AIResponse
-from infrastructure.adapters.factory_adapter import AIProviderFactoryAdapter
+from application.services.ai_service import AIService
+from bootstrap.dependencies import create_ai_provider
 
 app = FastAPI(
     title="AIAPI",
@@ -10,16 +11,14 @@ app = FastAPI(
     version="0.1.0",
 )
 
-VALID_PROVIDERS = {
-    AIProviderFactoryAdapter.OPENAI_API,
-    AIProviderFactoryAdapter.GEMINI_API,
-    AIProviderFactoryAdapter.CLAUDE_API,
-}
-
 
 @app.post("/api/v1/generate", response_model=AIResponse)
 async def generate(request: AIRequest):
-    if request.provider not in VALID_PROVIDERS:
+
+    ai_service: AIService | None = None
+    try:
+        ai_service = create_ai_provider(request.provider)
+    except ValueError:
         raise HTTPException(
             status_code=400, detail=f"Unsupported provider: {request.provider}"
         )
@@ -33,11 +32,8 @@ async def generate(request: AIRequest):
         "max_tokens": request.max_tokens,
     }
 
-    factory = AIProviderFactoryAdapter()
-    client = None
     try:
-        client = factory.create_llm(request.provider)
-        result = client.generate_content(params)
+        result = ai_service.generate_content(params)
         return AIResponse(
             success=True,
             provider=request.provider,
@@ -48,12 +44,6 @@ async def generate(request: AIRequest):
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
         raise HTTPException(status_code=500, detail="Internal server error")
-    finally:
-        if client:
-            try:
-                client.close_client()
-            except Exception:
-                pass
 
 
 @app.get("/health")

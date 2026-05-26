@@ -6,4 +6,6 @@ class AIService:
         self.ai_provider = ai_provider
 
     def generate_content(self, params: dict) -> str:
-        return self.ai_provider.generate_content(params)
+        response = self.ai_provider.generate_content(params)
+        self.ai_provider.close_client()
+        return response
