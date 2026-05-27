@@ -1,3 +1,14 @@
+"""FastAPI application exposing AI generation endpoints.
+
+DESCRIPTION
+This module declares the FastAPI `app` and provides two endpoints:
+`/api/v1/generate` for generation requests and `/health` for a simple
+health check.
+
+EXAMPLES
+Run with `uvicorn infrastructure.api.app:app` and POST to `/api/v1/generate`.
+"""
+
 from fastapi import FastAPI, HTTPException
 
 from application.dto.ai_request import AIRequest
@@ -14,6 +25,29 @@ app = FastAPI(
 
 @app.post("/api/v1/generate", response_model=AIResponse)
 async def generate(request: AIRequest):
+    """Handle AI generation requests and return a standardized response.
+
+    DESCRIPTION
+    Accepts an `AIRequest` payload, creates an `AIService` bound to the
+    requested provider, forwards generation parameters and returns an
+    `AIResponse`.
+
+    ARGS
+    request: AIRequest
+        Validated request body containing provider, model and prompt.
+
+    RETURN
+    AIResponse
+        Standardized response model containing result or error details.
+
+    EXCEPTIONS
+    HTTPException
+        Raises 400 for unsupported providers or provider-specific value
+        errors, and 500 for unexpected internal errors.
+
+    EXAMPLES
+    >>> client.post('/api/v1/generate', json={...})
+    """
 
     ai_service: AIService | None = None
     try:
@@ -48,4 +82,14 @@ async def generate(request: AIRequest):
 
 @app.get("/health")
 async def health_check():
+    """Simple health check endpoint.
+
+    RETURN
+    dict
+        A JSON-friendly dictionary with `status: ok` when the app is healthy.
+
+    EXAMPLES
+    >>> client.get('/health')
+    {"status": "ok"}
+    """
     return {"status": "ok"}
