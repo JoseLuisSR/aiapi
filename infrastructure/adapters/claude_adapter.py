@@ -56,13 +56,19 @@ class ClaudeAdapter(AIProviderPort):
         EXAMPLES
         >>> adapter.generate_content({'model':'c','prompt':'Hi'})
         """
+        sampling_param = {}
+
+        if params.get("temperature") is not None:
+            sampling_param["temperature"] = params.get("temperature")
+        elif params.get("top_p") is not None:
+            sampling_param["top_p"] = params.get("top_p")
+
         self.response = self.client.messages.create(
             max_tokens=params.get("max_tokens"),
             messages=[{"role": "user", "content": params.get("prompt")}],
             model=params.get("model"),
-            temperature=params.get("temperature"),
-            # top_p=params.get("top_p"),
             top_k=params.get("top_k"),
+            **sampling_param,
         )
         return self.response.content[0].text
 
