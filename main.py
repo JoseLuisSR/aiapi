@@ -11,7 +11,6 @@ Run locally:
 
 import uvicorn
 
-
 if __name__ == "__main__":
     """Start the Uvicorn development server.
 

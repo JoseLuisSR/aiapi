@@ -52,10 +52,10 @@ async def generate(request: AIRequest):
     ai_service: AIService | None = None
     try:
         ai_service = create_ai_provider(request.provider)
-    except ValueError:
+    except ValueError as e:
         raise HTTPException(
             status_code=400, detail=f"Unsupported provider: {request.provider}"
-        )
+        ) from e
 
     params = {
         "model": request.model,
@@ -75,9 +75,9 @@ async def generate(request: AIRequest):
             result=result,
         )
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/health")

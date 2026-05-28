@@ -48,7 +48,8 @@ class OpenAIAdapter(AIProviderPort):
 
         ARGS
         params: dict
-            Parameters forwarded to OpenAI client (`model`, `prompt`, `temperature`, `top_p`).
+            Parameters forwarded to OpenAI client (`model`, `prompt`, `temperature`,
+            `top_p`).
 
         RETURN
         str

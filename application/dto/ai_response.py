@@ -7,7 +7,6 @@ EXAMPLES
 >>> AIResponse(success=True, provider='OPENAI_API', result='Hi')
 """
 
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -39,7 +38,7 @@ class AIResponse(BaseModel):
     """
 
     success: bool
-    provider: Optional[str] = None
-    model: Optional[str] = None
-    result: Optional[str] = None
-    error: Optional[str] = None
+    provider: str | None = None
+    model: str | None = None
+    result: str | None = None
+    error: str | None = None
