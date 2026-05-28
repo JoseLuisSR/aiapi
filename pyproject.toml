@@ -34,4 +34,6 @@ select = [
     "SIM",
     # isort
     "I",
+    # flake8-bandit
+    "S",
 ]
