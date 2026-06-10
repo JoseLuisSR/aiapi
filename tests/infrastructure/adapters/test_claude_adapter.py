@@ -2,7 +2,7 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock
 
-from infrastructure.adapters.claude_adapter import ClaudeAdapter
+from src.infrastructure.adapters.claude_adapter import ClaudeAdapter
 
 
 class ClaudeAdapterTest(unittest.TestCase):

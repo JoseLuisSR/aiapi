@@ -2,7 +2,7 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock
 
-from infrastructure.adapters.openai_adapter import OpenAIAdapter
+from src.infrastructure.adapters.openai_adapter import OpenAIAdapter
 
 
 class OpenAIAdapterTest(unittest.TestCase):

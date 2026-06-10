@@ -3,7 +3,7 @@ from unittest.mock import Mock
 
 from google.genai import types
 
-from infrastructure.adapters.gemini_adapter import GeminiAdapter
+from src.infrastructure.adapters.gemini_adapter import GeminiAdapter
 
 
 class GeminiAdapterTest(unittest.TestCase):
