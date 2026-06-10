@@ -23,4 +23,6 @@ if __name__ == "__main__":
     EXAMPLES
     >>> python main.py
     """
-    uvicorn.run("infrastructure.api.app:app", host="127.0.0.1", port=8080, reload=True)
+    uvicorn.run(
+        "src.infrastructure.api.app:app", host="127.0.0.1", port=8080, reload=True
+    )
