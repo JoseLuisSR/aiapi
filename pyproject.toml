@@ -6,8 +6,10 @@ readme = "README.md"
 requires-python = ">=3.13.5"
 dependencies = [
     "anthropic>=0.103.1",
+    "coverage>=7.14.1",
     "fastapi>=0.104.0",
     "google-genai>=2.4.0",
+    "ipdb>=0.13.13",
     "openai>=2.37.0",
     "python-dotenv>=1.2.2",
     "uvicorn[standard]>=0.24.0",
