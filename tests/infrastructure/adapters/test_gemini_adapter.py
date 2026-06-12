@@ -18,6 +18,9 @@ class GeminiAdapterTest(unittest.TestCase):
         }
         self.adapter = GeminiAdapter()
 
+    def tearDown(self):
+        self.adapter.close_client()
+
     def test_generate_content_return_expected_data(self) -> None:
         expected: str = "Python is programming language."
         self.adapter.client = Mock()
@@ -46,3 +49,8 @@ class GeminiAdapterTest(unittest.TestCase):
             self.adapter.generate_content(self.params)
 
         self.assertEqual(context.exception.status_code, 503)
+
+    def test_close_client(self):
+        self.adapter.client = Mock()
+        self.adapter.close_client()
+        self.adapter.client.close.assert_called_once()

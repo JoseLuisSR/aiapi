@@ -17,6 +17,9 @@ class ClaudeAdapterTest(unittest.TestCase):
         }
         self.adapter = ClaudeAdapter()
 
+    def tearDown(self):
+        self.adapter.close_client()
+
     def test_generate_content_with_temperature_return_expected_value(self) -> None:
         expected: str = "Python is programming language."
         self.adapter.client = Mock()
@@ -54,3 +57,8 @@ class ClaudeAdapterTest(unittest.TestCase):
             top_k=self.params.get("top_k"),
             top_p=self.params.get("top_p"),
         )
+
+    def test_close_client(self):
+        self.adapter.client = Mock()
+        self.adapter.close_client()
+        self.adapter.client.close.assert_called_once()
