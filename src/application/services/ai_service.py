@@ -27,8 +27,10 @@ class AIService:
     >>> AIService(adapter).generate_content({'prompt':'Hello'})
     """
 
-    def __init__(self, ai_provider: AIProviderPort):
-        self.ai_provider = ai_provider
+    def __init__(self, ai_provider: AIProviderPort | None):
+        if ai_provider is None:
+            raise ValueError("ai_provider cannot be None")
+        self._ai_provider = ai_provider
 
     def generate_content(self, params: dict) -> str:
         """Generate content using the configured AI provider.
@@ -47,6 +49,7 @@ class AIService:
         EXAMPLES
         >>> service.generate_content({'model':'m','prompt':'Hi'})
         """
-        response = self.ai_provider.generate_content(params)
-        self.ai_provider.close_client()
-        return response
+        try:
+            return self._ai_provider.generate_content(params)
+        finally:
+            self._ai_provider.close_client()
