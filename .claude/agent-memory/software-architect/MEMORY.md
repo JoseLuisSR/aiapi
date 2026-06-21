@@ -1,0 +1,3 @@
+- [User Profile](user_profile.md) — JoseLuisSR, owner of AIAPI LLM gateway; works in Spanish, deliverables in English.
+- [AIAPI Architecture Conventions](project_aiapi_conventions.md) — hexagonal port/adapter conventions, docstring style, factory pattern, known tech debt.
+- [RFC Output Convention](feedback_rfc_output.md) — RFCs go under docs/rfc/, design-only, no production Python.
