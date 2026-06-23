@@ -1,0 +1,2 @@
+- [User Profile](user_profile.md) — user is JoseLuisSR, backend dev on AIAPI; expects plan → validate → code workflow
+- [Project Conventions](project_conventions.md) — docstring style, test style, import rules, provider ID casing, quality tools
