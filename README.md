@@ -153,6 +153,63 @@ main.py                 # Application entrypoint (starts the server)
 pyproject.toml          # Project metadata and dependencies
 ```
 
+## Claude Code Agents 🤖
+
+This project includes custom Claude Code agents to accelerate development. Each agent has a specific role and should be used at the right stage of the workflow.
+
+### Available Agents 🧠
+
+#### software-architect 🏛️
+
+A senior software architect that designs features and systems from scratch. It produces a complete RFC document — use case diagrams, package diagrams, class diagrams, sequence diagrams, entity-relationship diagrams, JSON data models, and OpenAPI/Swagger contracts.
+
+**When to use it:**
+- You need to add a new feature and want a full architectural design before writing code.
+- You need to define packages, classes, data models, API contracts, or design patterns.
+- You want a structured RFC that the entire team (Backend, Frontend, QA) can follow.
+
+> ⚠️ This agent **does not write production code**. It delivers the design document and defers implementation to the team or the `backend-developer` agent.
+
+**How to use it:**
+
+```
+@software-architect Design a new provider adapter for Microsoft Copilot LLM API following the hexagonal architecture already in place.
+```
+
+The agent will explore the codebase, ask clarifying questions, evaluate alternatives, and write an RFC file under `docs/rfc/`.
+
+---
+
+#### backend-developer 💻
+
+A senior Python backend developer that turns an already-decided architecture design (RFC, ADR) into functional, tested code. It advances step by step, pausing for human validation between changes.
+
+**When to use it:**
+- An RFC or ADR has been approved and you want to implement it.
+- You need to add REST endpoints, business logic, data models, or unit/integration tests.
+- You want code that follows the project's conventions, SOLID principles, and quality gates.
+
+> ⚠️ This agent **does not make architecture decisions**. If a change requires rethinking the design, it stops and defers to the architect.
+
+**How to use it:**
+
+```
+@backend-developer Implement the Microsoft Copilot adapter described in docs/rfc/20250601-copilot-adapter.md.
+```
+
+The agent will read the RFC, explore the codebase, present an implementation plan for your approval, and then implement each phase waiting for your validation before continuing.
+
+---
+
+### Recommended Workflow 🔄
+
+```
+1. 🏛️  software-architect  →  RFC document in docs/rfc/
+2. ✅  Human review        →  Approve or adjust the RFC
+3. 💻  backend-developer   →  Implementation + tests, phase by phase
+4. ✅  Human validation    →  Review each phase before the next one
+```
+
 ## Hexagonal Architecture 🧩
 
 This project uses hexagonal architecture to keep the core logic independent from external services.
