@@ -11,6 +11,7 @@ Run with `uvicorn infrastructure.api.app:app` and POST to `/api/v1/generate`.
 
 from fastapi import FastAPI, HTTPException
 
+from src.application.domain.ai_provider import AIProvider
 from src.application.dto.ai_request import AIRequest
 from src.application.dto.ai_response import AIResponse
 from src.application.services.ai_service import AIService
@@ -18,8 +19,11 @@ from src.bootstrap.dependencies import create_ai_provider
 
 app = FastAPI(
     title="AIAPI",
-    description="AI API Gateway for OpenAI, Gemini, and Claude",
-    version="0.1.0",
+    description=(
+        "AI API Gateway for OpenAI, Gemini, Claude, "
+        "and Microsoft Copilot (Azure OpenAI)"
+    ),
+    version="0.2.0",
 )
 
 
@@ -54,7 +58,12 @@ async def generate(request: AIRequest):
         ai_service = create_ai_provider(request.provider)
     except ValueError as e:
         raise HTTPException(
-            status_code=400, detail=f"Unsupported provider: {request.provider}"
+            status_code=400,
+            detail={
+                "code": "UNSUPPORTED_PROVIDER",
+                "message": f"Provider '{request.provider}' is not supported.",
+                "supported": [p.value for p in AIProvider],
+            },
         ) from e
 
     params = {
@@ -64,6 +73,8 @@ async def generate(request: AIRequest):
         "top_p": request.top_p,
         "top_k": request.top_k,
         "max_tokens": request.max_tokens,
+        "deployment": request.deployment,
+        "api_version": request.api_version,
     }
 
     try:
@@ -75,9 +86,21 @@ async def generate(request: AIRequest):
             result=result,
         )
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "PROVIDER_MISCONFIGURED",
+                "message": str(e),
+            },
+        ) from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "code": "INTERNAL_ERROR",
+                "message": str(e),
+            },
+        ) from e
 
 
 @app.get("/health")
