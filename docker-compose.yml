@@ -1,0 +1,37 @@
+services:
+  aiapi:
+    build:
+      context: .
+      target: runtime
+    image: aiapi:dev
+    container_name: aiapi
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    volumes:
+      # Bind-mount only the application source so the .venv layer is preserved.
+      - ./src:/app/src
+      - ./config.py:/app/config.py
+    # Override CMD to enable live reload for local development.
+    command: >
+      uvicorn src.infrastructure.api.app:app
+      --host 0.0.0.0
+      --port 8080
+      --reload
+    healthcheck:
+      test:
+        - "CMD"
+        - "python"
+        - "-c"
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - aiapi-net
+
+networks:
+  aiapi-net:
+    driver: bridge
