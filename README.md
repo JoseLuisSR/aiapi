@@ -27,26 +27,84 @@ uv run uvicorn infrastructure.api.app:app --reload --host 127.0.0.1 --port 8080
 - `uv sync --group dev` adds tools like `ruff`, `mypy`, and `pre-commit`.
 - The application runs on `http://127.0.0.1:8080`.
 
+## Deployment with Docker 🐳
+
+The project ships with a production-ready `Dockerfile` (multi-stage build) and a `docker-compose.yml` for local development.
+
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) installed and running.
+- A `.env` file in the project root with your API keys (see [Configuration](#configuration-) below).
+
+### Build the image
+
+```bash
+docker build -t aiapi:latest .
+```
+
+### Run the container
+
+```bash
+# Inject API keys from .env at runtime (keys are never baked into the image)
+docker run --rm \
+  --env-file .env \
+  -p 8080:8080 \
+  aiapi:latest
+```
+
+Or pass individual keys:
+
+```bash
+docker run --rm \
+  -e OPENAI_API_KEY=sk-... \
+  -e CLAUDE_API_KEY=sk-ant-... \
+  -e GEMINI_API_KEY=AIza... \
+  -p 8080:8080 \
+  aiapi:latest
+```
+
+The server is available at `http://localhost:8080` once the container starts.
+
+### Development stack with Docker Compose
+
+`docker-compose.yml` enables live reload by mounting the source code into the container:
+
+```bash
+# Build and start
+docker compose up --build
+
+# Start in detached mode
+docker compose up --build -d
+
+# Tail logs
+docker compose logs -f aiapi
+
+# Stop and remove
+docker compose down
+```
+
 ## Configuration 🔧
 
 This project reads its secrets from a `.env` file in the project root. Create it like this:
 
 ```dotenv
 # OpenAI
-OPENAI_API_KEY="your_openai_api_key"
+OPENAI_API_KEY=your_openai_api_key
 
 # Claude
-CLAUDE_API_KEY="your_claude_api_key"
+CLAUDE_API_KEY=your_claude_api_key
 
 # Gemini
-GEMINI_API_KEY="your_gemini_api_key"
+GEMINI_API_KEY=your_gemini_api_key
 
 # Microsoft Copilot (Azure OpenAI)
-COPILOT_API_KEY="your_azure_openai_api_key"
-COPILOT_API_ENDPOINT="https://your-resource.openai.azure.com/"
-COPILOT_API_VERSION="2024-10-21"
-COPILOT_DEPLOYMENT="your_default_deployment_name"
+COPILOT_API_KEY=your_azure_openai_api_key
+COPILOT_API_ENDPOINT=https://your-resource.openai.azure.com/
+COPILOT_API_VERSION=2024-10-21
+COPILOT_DEPLOYMENT=your_default_deployment_name
 ```
+
+> **Important — no quotes around values.** `python-dotenv` (used for local `uv` runs) strips quotes automatically, but `docker --env-file` passes them literally. Writing values without quotes works correctly in both contexts.
 
 ### How To Get Each API Key ✨
 
@@ -230,6 +288,10 @@ infrastructure/         # External adapters and API layer
 config.py               # Global configuration settings (includes COPILOT_* env-var names)
 main.py                 # Application entrypoint (starts the server)
 pyproject.toml          # Project metadata and dependencies
+
+Dockerfile              # Multi-stage production image (builder + runtime stages)
+docker-compose.yml      # Development stack with live reload and .env injection
+.dockerignore           # Excludes secrets, caches, and dev artifacts from the build context
 ```
 
 ## Claude Code Agents 🤖
