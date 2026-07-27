@@ -1,0 +1,11 @@
+/* Minor presentation tweaks that Bootstrap utilities don't already cover. */
+
+.form-range {
+  min-width: 8rem;
+}
+
+#result .card,
+#result .alert {
+  position: sticky;
+  top: 1rem;
+}

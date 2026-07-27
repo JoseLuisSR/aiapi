@@ -1,0 +1,19 @@
+{#
+  Expected context:
+    result  dict  {"kind": "success", "provider": str, "model": str, "text": str}
+#}
+<div class="card shadow-sm border-success-subtle" role="status">
+  <div class="card-header bg-success-subtle d-flex justify-content-between align-items-center">
+    <span class="fw-semibold">Generated result</span>
+    <span class="badge text-bg-success">success</span>
+  </div>
+  <div class="card-body">
+    <dl class="row small text-muted mb-3">
+      <dt class="col-4">Provider</dt>
+      <dd class="col-8">{{ result.provider }}</dd>
+      <dt class="col-4">Model</dt>
+      <dd class="col-8">{{ result.model }}</dd>
+    </dl>
+    <p class="card-text" style="white-space: pre-wrap;">{{ result.text }}</p>
+  </div>
+</div>

@@ -1,0 +1,113 @@
+{#
+  Full generation form + result panel. Returned both by the initial page
+  render (GET /) and by the form submission (POST /ui/generate, hx-swap
+  outerHTML on this same #generate-section id), so that validation errors
+  and results can be re-rendered together with the previously entered
+  values (per-field errors + value preservation on failed validation).
+
+  Expected context:
+    providers        dict   PROVIDER_UI_CONFIG (for the <select> options)
+    provider          str   selected provider id
+    provider_config   dict  PROVIDER_UI_CONFIG[provider]
+    form_values       dict  previously submitted values (blank on fresh load)
+    field_errors      dict  validation error messages keyed by field name
+    result            dict | None   {"kind": "success"|"error", ...}
+#}
+<div id="generate-section">
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h1 class="h4 mb-3">Generate content</h1>
+          <form id="generate-form"
+                hx-post="/ui/generate"
+                hx-target="#generate-section"
+                hx-swap="outerHTML"
+                hx-indicator="#generate-spinner"
+                hx-disabled-elt="#submit-btn"
+                novalidate>
+
+            <div class="mb-3">
+              <label for="provider" class="form-label">Provider</label>
+              <select id="provider" name="provider" class="form-select"
+                      hx-get="/ui/fields"
+                      hx-target="#provider-fields"
+                      hx-swap="innerHTML"
+                      hx-include="this"
+                      hx-indicator="#fields-spinner"
+                      aria-describedby="provider_help">
+                {% for key, cfg in providers.items() %}
+                  <option value="{{ key }}" {% if key == provider %}selected{% endif %}>{{ cfg.label }}</option>
+                {% endfor %}
+              </select>
+              <div id="provider_help" class="form-text">
+                Only the parameters supported by the selected provider are shown below.
+              </div>
+              {% if field_errors.get('provider') %}
+                <div class="text-danger small mt-1">{{ field_errors.get('provider') }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label for="model" class="form-label">Model <span class="text-danger" aria-hidden="true">*</span></label>
+              <input type="text" class="form-control{% if field_errors.get('model') %} is-invalid{% endif %}"
+                     id="model" name="model" required aria-required="true"
+                     placeholder="e.g. gpt-4o, claude-3-5-sonnet-20241022, gemini-2.0-flash"
+                     value="{{ form_values.get('model') or '' }}">
+              {% if field_errors.get('model') %}
+                <div class="invalid-feedback d-block">{{ field_errors.get('model') }}</div>
+              {% endif %}
+              <div class="form-text">
+                For Copilot, used as the deployment name unless "Deployment override" is set.
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="prompt" class="form-label">Prompt <span class="text-danger" aria-hidden="true">*</span></label>
+              <textarea class="form-control{% if field_errors.get('prompt') %} is-invalid{% endif %}"
+                        id="prompt" name="prompt" rows="4" required aria-required="true"
+                        placeholder="Ask something...">{{ form_values.get('prompt') or '' }}</textarea>
+              {% if field_errors.get('prompt') %}
+                <div class="invalid-feedback d-block">{{ field_errors.get('prompt') }}</div>
+              {% endif %}
+            </div>
+
+            <hr class="my-4">
+            <h2 class="h6 text-muted text-uppercase mb-3">Provider parameters</h2>
+            <div id="provider-fields">
+              {% include "fragments/provider_fields.html" %}
+            </div>
+
+            <div class="d-flex align-items-center gap-3 mt-4">
+              <button id="submit-btn" type="submit" class="btn btn-primary">
+                Generate
+              </button>
+              <span id="generate-spinner" class="htmx-indicator spinner-border spinner-border-sm text-primary"
+                    role="status" aria-hidden="true"></span>
+              <span id="fields-spinner" class="htmx-indicator spinner-border spinner-border-sm text-secondary"
+                    role="status" aria-hidden="true"></span>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div id="result">
+        {% if result %}
+          {% if result.kind == "success" %}
+            {% include "fragments/result_success.html" %}
+          {% else %}
+            {% include "fragments/result_error.html" %}
+          {% endif %}
+        {% else %}
+          <div class="card border-0 bg-transparent">
+            <div class="card-body text-muted">
+              <p class="mb-0">Results will appear here after you submit the form.</p>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>

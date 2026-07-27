@@ -5,8 +5,11 @@ services:
       target: runtime
     image: aiapi:dev
     container_name: aiapi
+    # Loopback-only by default: /api/v1/generate has no built-in
+    # authentication, so publishing beyond 127.0.0.1 (e.g. "0.0.0.0:8080:8080")
+    # is an explicit opt-in an operator must make deliberately.
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     env_file:
       - .env
     volumes:
