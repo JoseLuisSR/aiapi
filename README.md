@@ -1,5 +1,7 @@
 # AIAPI 🤖
 
+https://github.com/user-attachments/assets/b7d6b319-0749-4e34-9013-92a01002059d
+
 AIAPI is a small web service that sends one generation request to different AI providers and returns a standard JSON response. It supports OpenAI, Claude, Gemini, and Microsoft Copilot (Azure OpenAI).
 
 ## Installation with uv 🚀
