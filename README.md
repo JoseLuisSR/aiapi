@@ -26,6 +26,7 @@ uv run uvicorn infrastructure.api.app:app --reload --host 127.0.0.1 --port 8080
 - `uv sync` creates the virtual environment and installs all runtime dependencies.
 - `uv sync --group dev` adds tools like `ruff`, `mypy`, and `pre-commit`.
 - The application runs on `http://127.0.0.1:8080`.
+- Once it's running, open `http://127.0.0.1:8080/` in a browser for the web UI, or call `http://127.0.0.1:8080/api/v1/generate` directly (see [Web API](#web-api-) and [Web UI](#web-ui-) below).
 
 ## Deployment with Docker 🐳
 
@@ -48,7 +49,7 @@ docker build -t aiapi:latest .
 # Inject API keys from .env at runtime (keys are never baked into the image)
 docker run --rm \
   --env-file .env \
-  -p 8080:8080 \
+  -p 127.0.0.1:8080:8080 \
   aiapi:latest
 ```
 
@@ -59,11 +60,13 @@ docker run --rm \
   -e OPENAI_API_KEY=sk-... \
   -e CLAUDE_API_KEY=sk-ant-... \
   -e GEMINI_API_KEY=AIza... \
-  -p 8080:8080 \
+  -p 127.0.0.1:8080:8080 \
   aiapi:latest
 ```
 
 The server is available at `http://localhost:8080` once the container starts.
+
+> **Loopback-only by default.** `/api/v1/generate` has no built-in authentication, so the examples above publish only to `127.0.0.1` — matching the pre-Docker behavior where the API was reachable solely from the same machine. If you genuinely need the container reachable from other hosts, publish more broadly yourself (e.g. `-p 0.0.0.0:8080:8080` or `-p 8080:8080`) and put an authenticating reverse proxy or network policy in front of it first, since anyone who can reach the port can spend your provider API quota.
 
 ### Development stack with Docker Compose
 
@@ -140,6 +143,26 @@ COPILOT_DEPLOYMENT=your_default_deployment_name
    - `COPILOT_API_VERSION` — the REST API version (e.g. `2024-10-21`).
    - `COPILOT_DEPLOYMENT` — the default deployment name used when the request omits `deployment`.
 
+
+## Web UI 🖥️
+
+A server-rendered web UI (FastAPI + Jinja2 + HTMX + Bootstrap) is available for calling `POST /api/v1/generate` from a browser, without writing any JSON or `curl` command by hand.
+
+### Open it
+
+1. Start the app (`uv run python main.py`, `uv run uvicorn ...`, or the Docker container — any of the ways described above).
+2. Open **http://127.0.0.1:8080/** in a browser.
+
+### How to use it
+
+1. **Provider** — pick one from the dropdown: OpenAI, Claude, Gemini, or Copilot. The **Provider parameters** section below updates automatically (via HTMX, no page reload) to show only the fields that provider actually supports — e.g. `top_k` disappears for OpenAI/Copilot, and Claude shows a *Use temperature / Use top_p* toggle instead of both at once, since Anthropic only accepts one of the two per request.
+2. **Model** — the model or deployment name (e.g. `gpt-4o-mini`, `claude-3-5-sonnet-20241022`, `gemini-2.5-flash`). For Copilot this doubles as the deployment name unless you set **Deployment override**.
+3. **Prompt** — the text sent to the model.
+4. **Provider parameters** — each numeric field (`temperature`, `top_p`, `top_k`, `max_tokens`) is a slider paired with a number input, labeled with its valid `min`/`max` range and default for the selected provider (see [Per-provider parameter support](#per-provider-parameter-support-verified-) below for the full table and sources). Values outside the shown range, or missing required fields (e.g. Claude's `max_tokens`), are rejected both in the browser and again on the server before any request is sent to the provider.
+5. For Copilot, two extra optional text fields appear: **Deployment override** and **API version**.
+6. Click **Generate**. The button disables while the request is in flight; the result — the generated text, or a Bootstrap error alert with the same error codes as the JSON API (`VALIDATION_ERROR`, `UNSUPPORTED_PROVIDER`, `PROVIDER_MISCONFIGURED`, `INTERNAL_ERROR`) — replaces the results panel in place.
+
+> The UI is a thin presentation layer: it calls the exact same `AIService`/adapter code as the JSON API described below, so behavior (including required API keys in `.env`) is identical either way.
 
 ## Web API 🌐
 
@@ -283,7 +306,11 @@ infrastructure/         # External adapters and API layer
 │   ├── gemini_adapter.py   # Adapter for Gemini (Google)
 │   └── copilot_adapter.py  # Adapter for Microsoft Copilot (Azure OpenAI)
 └── api/
-    └── app.py          # FastAPI application and route definitions
+    ├── app.py          # FastAPI application: JSON API routes + mounts the web UI router
+    ├── web.py           # Web UI routes (GET /, GET /ui/fields, POST /ui/generate)
+    ├── provider_ui.py   # Per-provider parameter matrix (min/max/default) used by the web UI
+    ├── templates/        # Jinja2 templates (base page + HTMX fragments)
+    └── static/           # CSS/JS assets served at /static
 
 config.py               # Global configuration settings (includes COPILOT_* env-var names)
 main.py                 # Application entrypoint (starts the server)

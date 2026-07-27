@@ -1,0 +1,15 @@
+{#
+  Expected context:
+    result  dict  {"kind": "error", "code": str, "message": str}
+
+  Mirrors the JSON API's error semantics (see app.py):
+    UNSUPPORTED_PROVIDER / PROVIDER_MISCONFIGURED / VALIDATION_ERROR -> 400
+    INTERNAL_ERROR -> 500
+#}
+<div class="alert alert-danger" role="alert" aria-live="assertive">
+  <h2 class="h6 alert-heading mb-1">Request failed</h2>
+  <p class="mb-1">{{ result.message }}</p>
+  {% if result.code %}
+    <p class="mb-0 small text-muted">Error code: <code>{{ result.code }}</code></p>
+  {% endif %}
+</div>

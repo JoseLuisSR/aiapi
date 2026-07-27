@@ -1,21 +1,27 @@
 """FastAPI application exposing AI generation endpoints.
 
 DESCRIPTION
-This module declares the FastAPI `app` and provides two endpoints:
+This module declares the FastAPI `app` and provides two JSON endpoints:
 `/api/v1/generate` for generation requests and `/health` for a simple
-health check.
+health check. It also mounts the server-rendered HTML UI (`web.py`) and
+its static assets, which is a second driving adapter over the same
+application/bootstrap layer.
 
 EXAMPLES
 Run with `uvicorn infrastructure.api.app:app` and POST to `/api/v1/generate`.
 """
 
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
 
 from src.application.domain.ai_provider import AIProvider
 from src.application.dto.ai_request import AIRequest
 from src.application.dto.ai_response import AIResponse
 from src.application.services.ai_service import AIService
 from src.bootstrap.dependencies import create_ai_provider
+from src.infrastructure.api.web import router as web_router
 
 app = FastAPI(
     title="AIAPI",
@@ -25,6 +31,10 @@ app = FastAPI(
     ),
     version="0.2.0",
 )
+
+STATIC_DIR = Path(__file__).parent / "static"
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+app.include_router(web_router)
 
 
 @app.post("/api/v1/generate", response_model=AIResponse)

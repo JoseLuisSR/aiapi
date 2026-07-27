@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Generate — AIAPI Gateway{% endblock %}
+
+{% block content %}
+  <p class="text-muted mb-4">
+    Pick a provider, fill in a prompt and only the generation parameters it
+    actually supports, then submit. This UI calls the same
+    <code>POST /api/v1/generate</code> application/service layer used by the JSON API.
+  </p>
+  {% include "fragments/generate_section.html" %}
+{% endblock %}

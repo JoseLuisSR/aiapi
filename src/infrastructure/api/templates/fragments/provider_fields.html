@@ -1,0 +1,75 @@
+{% import "macros.html" as m %}
+{#
+  Renders only the generation parameters relevant to `provider`, per the
+  researched min/max/default matrix in provider_ui.PROVIDER_UI_CONFIG.
+
+  Expected context:
+    provider         str    e.g. "claude_api"
+    provider_config  dict   PROVIDER_UI_CONFIG[provider]
+    form_values      dict   previously submitted values (blank dict on fresh load)
+    field_errors     dict   validation error messages keyed by field name
+#}
+{% set cfg = provider_config %}
+{% set sampling_mode = form_values.get('claude_sampling_mode') or cfg.get('sampling_default') %}
+
+{% if cfg.get('sampling_toggle') %}
+  <div class="mb-3">
+    <label class="form-label d-block">Sampling mode</label>
+    <div class="btn-group" role="group" aria-label="Claude sampling mode">
+      <input type="radio" class="btn-check" name="claude_sampling_mode" id="sampling_temperature"
+        value="temperature" autocomplete="off"
+        {% if sampling_mode == "temperature" %}checked{% endif %}>
+      <label class="btn btn-outline-primary" for="sampling_temperature">Use temperature</label>
+
+      <input type="radio" class="btn-check" name="claude_sampling_mode" id="sampling_top_p"
+        value="top_p" autocomplete="off"
+        {% if sampling_mode == "top_p" %}checked{% endif %}>
+      <label class="btn btn-outline-primary" for="sampling_top_p">Use top_p</label>
+    </div>
+    <div class="form-text">
+      Claude accepts only one of temperature / top_p per request. The unselected
+      control below is disabled so it is not submitted.
+    </div>
+  </div>
+
+  <div data-sampling-panel="temperature" {% if sampling_mode != "temperature" %}class="d-none"{% endif %}>
+    {{ m.range_number_field("temperature", "Temperature", cfg.temperature, form_values.get('temperature'), field_errors.get('temperature'), disabled=(sampling_mode != "temperature")) }}
+  </div>
+  <div data-sampling-panel="top_p" {% if sampling_mode != "top_p" %}class="d-none"{% endif %}>
+    {{ m.range_number_field("top_p", "Top P", cfg.top_p, form_values.get('top_p'), field_errors.get('top_p'), disabled=(sampling_mode != "top_p")) }}
+  </div>
+{% else %}
+  {% if "temperature" in cfg.get('supports', []) %}
+    {{ m.range_number_field("temperature", "Temperature", cfg.temperature, form_values.get('temperature'), field_errors.get('temperature')) }}
+  {% endif %}
+  {% if "top_p" in cfg.get('supports', []) %}
+    {{ m.range_number_field("top_p", "Top P", cfg.top_p, form_values.get('top_p'), field_errors.get('top_p')) }}
+  {% endif %}
+{% endif %}
+
+{% if "top_k" in cfg.get('supports', []) %}
+  {% set top_k_value = form_values.get('top_k') %}
+  {% if cfg.top_k.get('optional') %}
+    <div class="form-check form-switch mb-2">
+      <input class="form-check-input" type="checkbox" role="switch" id="top_k_enabled"
+        data-enable-target="top_k_number,top_k_range"
+        {% if top_k_value is not none %}checked{% endif %}>
+      <label class="form-check-label" for="top_k_enabled">Set top_k (optional)</label>
+    </div>
+    {{ m.range_number_field("top_k", "Top K", cfg.top_k, top_k_value, field_errors.get('top_k'), disabled=(top_k_value is none)) }}
+  {% else %}
+    {{ m.range_number_field("top_k", "Top K", cfg.top_k, top_k_value, field_errors.get('top_k')) }}
+  {% endif %}
+{% endif %}
+
+{% if "max_tokens" in cfg.get('supports', []) %}
+  {{ m.number_field("max_tokens", "Max tokens", cfg.max_tokens, form_values.get('max_tokens'), field_errors.get('max_tokens'), required=cfg.max_tokens.get('required', False)) }}
+{% endif %}
+
+{% if "deployment" in cfg.get('supports', []) %}
+  {{ m.text_field("deployment", "Deployment override", cfg.deployment, form_values.get('deployment'), field_errors.get('deployment')) }}
+{% endif %}
+
+{% if "api_version" in cfg.get('supports', []) %}
+  {{ m.text_field("api_version", "API version", cfg.api_version, form_values.get('api_version'), field_errors.get('api_version')) }}
+{% endif %}

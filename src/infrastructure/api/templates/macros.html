@@ -1,0 +1,97 @@
+{# Reusable Jinja macros for the AIAPI generation form.
+   Presentation-only: no business logic, just rendering decisions. #}
+
+{% macro range_number_field(name, label, spec, value, error=None, required=False, disabled=False) %}
+<div class="mb-3">
+  <div class="d-flex justify-content-between align-items-baseline">
+    <label for="{{ name }}_number" class="form-label mb-1">
+      {{ label }}{% if required %} <span class="text-danger" aria-hidden="true">*</span>{% endif %}
+    </label>
+    <span class="text-muted small">min {{ spec.min }} &ndash; max {{ spec.max }}</span>
+  </div>
+  <div class="d-flex align-items-center gap-2">
+    <input
+      type="range"
+      class="form-range flex-grow-1"
+      id="{{ name }}_range"
+      min="{{ spec.min }}"
+      max="{{ spec.max }}"
+      step="{{ spec.step }}"
+      value="{{ value if value is not none else spec.default }}"
+      oninput="document.getElementById('{{ name }}_number').value = this.value"
+      {% if disabled %}disabled{% endif %}
+      aria-hidden="true"
+      tabindex="-1">
+    <input
+      type="number"
+      class="form-control{% if error %} is-invalid{% endif %}"
+      style="width: 7.5rem"
+      id="{{ name }}_number"
+      name="{{ name }}"
+      min="{{ spec.min }}"
+      max="{{ spec.max }}"
+      step="{{ spec.step }}"
+      value="{{ value if value is not none else spec.default }}"
+      oninput="document.getElementById('{{ name }}_range').value = this.value"
+      {% if required %}required aria-required="true"{% endif %}
+      {% if disabled %}disabled{% endif %}
+      aria-describedby="{{ name }}_help"
+      {% if error %}aria-invalid="true"{% endif %}>
+  </div>
+  {% if error %}
+    <div class="invalid-feedback d-block">{{ error }}</div>
+  {% endif %}
+  {% if spec.help %}
+    <div id="{{ name }}_help" class="form-text">{{ spec.help }}</div>
+  {% endif %}
+</div>
+{% endmacro %}
+
+
+{% macro number_field(name, label, spec, value, error=None, required=False) %}
+<div class="mb-3">
+  <label for="{{ name }}" class="form-label mb-1">
+    {{ label }}{% if required %} <span class="text-danger" aria-hidden="true">*</span>{% endif %}
+  </label>
+  <input
+    type="number"
+    class="form-control{% if error %} is-invalid{% endif %}"
+    id="{{ name }}"
+    name="{{ name }}"
+    min="{{ spec.min }}"
+    {% if spec.max is not none %}max="{{ spec.max }}"{% endif %}
+    step="1"
+    value="{{ value if value is not none else spec.default }}"
+    {% if required %}required aria-required="true"{% endif %}
+    aria-describedby="{{ name }}_help"
+    {% if error %}aria-invalid="true"{% endif %}>
+  {% if error %}
+    <div class="invalid-feedback d-block">{{ error }}</div>
+  {% endif %}
+  {% if spec.help %}
+    <div id="{{ name }}_help" class="form-text">{{ spec.help }}</div>
+  {% endif %}
+</div>
+{% endmacro %}
+
+
+{% macro text_field(name, label, spec, value, error=None) %}
+<div class="mb-3">
+  <label for="{{ name }}" class="form-label mb-1">{{ label }}</label>
+  <input
+    type="text"
+    class="form-control{% if error %} is-invalid{% endif %}"
+    id="{{ name }}"
+    name="{{ name }}"
+    placeholder="{{ spec.placeholder or '' }}"
+    value="{{ value or '' }}"
+    aria-describedby="{{ name }}_help"
+    {% if error %}aria-invalid="true"{% endif %}>
+  {% if error %}
+    <div class="invalid-feedback d-block">{{ error }}</div>
+  {% endif %}
+  {% if spec.help %}
+    <div id="{{ name }}_help" class="form-text">{{ spec.help }}</div>
+  {% endif %}
+</div>
+{% endmacro %}
